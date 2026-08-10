@@ -58,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
 
 const emit = defineEmits(['captured']);
 
@@ -108,6 +108,10 @@ function capturePhoto() {
 
   canvas.toBlob(
     (blob) => {
+      if (!blob) {
+        error.value = 'Não foi possível capturar a imagem.';
+        return;
+      }
       const file = new File([blob], 'camera-capture.jpg', {
         type: 'image/jpeg',
       });
@@ -139,6 +143,8 @@ function stopCamera() {
   capturedFile.value = null;
   captured.value = false;
 }
+
+onUnmounted(stopCamera);
 </script>
 
 <style scoped>

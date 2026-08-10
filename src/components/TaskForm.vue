@@ -18,10 +18,14 @@
       <!-- Input com capture (padrão) -->
       <label class="image-label" :class="{ disabled: uploading }">
         <span v-if="uploading" class="upload-status">Enviando...</span>
-        <span v-else>Adicionar imagem</span>
+        <span v-else>
+          {{ previewUrl || editingTask?.img_url ? 'Trocar imagem' : 'Adicionar imagem' }}
+        </span>
         <input type="file" accept="image/jpeg,image/png" capture="environment" class="image-input" :disabled="uploading"
           @change="handleImageChange" />
       </label>
+      <p class="image-help">Em celular, o botão pode abrir a câmera. Em notebook, abre o seletor de arquivos.</p>
+      <p v-if="imageError" class="image-error">{{ imageError }}</p>
 
       <!-- Alternativa com preview ao vivo -->
       <button type="button" class="task-button-secondary" @click="showCameraCapture = !showCameraCapture">
@@ -51,6 +55,7 @@ const previewUrl = ref(null)
 const imgAttachmentKey = ref(null)
 const uploading = ref(false)
 const showCameraCapture = ref(false)
+const imageError = ref('')
 
 watch(
   () => props.editingTask,
@@ -59,6 +64,8 @@ watch(
     if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
     previewUrl.value = null;
     imgAttachmentKey.value = null;
+    showCameraCapture.value = false;
+    imageError.value = '';
   },
 );
 
@@ -80,6 +87,8 @@ function handleSubmit() {
   if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
   previewUrl.value = null;
   imgAttachmentKey.value = null;
+  showCameraCapture.value = false;
+  imageError.value = '';
 }
 
 function handleCancel() {
@@ -87,12 +96,14 @@ function handleCancel() {
   if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
   previewUrl.value = null;
   imgAttachmentKey.value = null;
+  showCameraCapture.value = false;
+  imageError.value = '';
   emit('cancel');
 }
 
-async function handleImageChange(event) {
-  const file = event.target.files[0];
+async function uploadImage(file) {
   if (!file) return;
+  imageError.value = '';
   if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
   previewUrl.value = URL.createObjectURL(file);
   uploading.value = true;
@@ -103,9 +114,20 @@ async function handleImageChange(event) {
     console.error('Erro ao fazer upload da imagem', err);
     previewUrl.value = null;
     imgAttachmentKey.value = null;
+    imageError.value = 'Não foi possível enviar a imagem.';
   } finally {
     uploading.value = false;
   }
+}
+
+function handleImageChange(event) {
+  uploadImage(event.target.files?.[0]);
+  event.target.value = '';
+}
+
+function handleCameraCapture(file) {
+  showCameraCapture.value = false;
+  uploadImage(file);
 }
 
 </script>
@@ -169,5 +191,10 @@ async function handleImageChange(event) {
   color: #999;
   margin: 0;
   flex-basis: 100%;
+}
+
+.image-error {
+  color: #c0392b;
+  font-size: 0.8rem;
 }
 </style>
