@@ -12,7 +12,12 @@
         :checked="task.done"
         @change="$emit('toggle', task.id)"
       />
-      <span class="task-title">{{ task.title }}</span>
+      <span class="task-content">
+        <span class="task-title">{{ task.title }}</span>
+        <span v-if="locationText" class="task-location">
+          {{ locationText }}
+        </span>
+      </span>
     </label>
     <div class="task-actions">
       <button class="task-edit" @click="$emit('edit', task)">Editar</button>
@@ -24,7 +29,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
   task: {
     type: Object,
     required: true,
@@ -32,6 +39,22 @@ defineProps({
 });
 
 defineEmits(['toggle', 'remove', 'edit']);
+
+const locationText = computed(() => {
+  const label = props.task.location_label?.trim();
+  if (label) return label;
+
+  if (props.task.latitude == null || props.task.longitude == null) return '';
+
+  return `${formatCoordinate(props.task.latitude)}, ${formatCoordinate(
+    props.task.longitude,
+  )}`;
+});
+
+function formatCoordinate(value) {
+  const coordinate = Number(value);
+  return Number.isFinite(coordinate) ? coordinate.toFixed(5) : String(value);
+}
 </script>
 
 <style scoped>
@@ -67,6 +90,19 @@ defineEmits(['toggle', 'remove', 'edit']);
 
 .task-title {
   font-size: 1rem;
+}
+
+.task-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.task-location {
+  margin-top: 2px;
+  color: #777;
+  font-size: 0.75rem;
+  line-height: 1.3;
 }
 
 .task-item.done .task-title {
