@@ -18,7 +18,7 @@ function writeCache(key, value) {
   try {
     localStorage.setItem(`${CACHE_PREFIX}${key}`, JSON.stringify(value))
   } catch {
-    // O cache é opcional; não deve impedir o salvamento da tarefa.
+    return 
   }
 }
 

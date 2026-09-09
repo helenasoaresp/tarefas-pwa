@@ -39,7 +39,6 @@
       </button>
     </div>
 
-    <!-- LOCALIZAÇÃO -->
     <div v-if="location" class="location-section">
       <p v-if="location.label">
         <strong>Endereço:</strong>
@@ -76,7 +75,6 @@
       {{ locationError }}
     </p>
 
-    <!-- IMAGEM -->
     <div class="image-section">
       <img
         v-if="previewUrl || editingTask?.img_url"
