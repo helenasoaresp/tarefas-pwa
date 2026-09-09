@@ -1,17 +1,30 @@
 import apiClient from './config.js';
 
+const LOCATION_FIELDS = [
+  'latitude',
+  'longitude',
+  'geolocation_accuracy',
+  'geolocation_timestamp',
+  'location_label',
+];
+
 const tasksApi = {
   getAll() {
     return apiClient.get('/tasks');
   },
 
   create(input = {}) {
-    const { title, imgAttachmentKey = null } =
-      typeof input === 'string' ? { title: input } : input;
-    const payload = { title };
-    if (imgAttachmentKey != null) {
-      payload.img_attachment_key = imgAttachmentKey;
+    const task = typeof input === 'string' ? { title: input } : input;
+    const payload = { title: task.title };
+
+    if (task.imgAttachmentKey != null) {
+      payload.img_attachment_key = task.imgAttachmentKey;
     }
+
+    for (const field of LOCATION_FIELDS) {
+      payload[field] = task[field] ?? null;
+    }
+
     return apiClient.post('/tasks', payload);
   },
 

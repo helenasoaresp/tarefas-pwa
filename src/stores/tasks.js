@@ -2,6 +2,14 @@ import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 import tasksApi from '../api/tasksApi.js';
 
+const LOCATION_FIELDS = [
+  'latitude',
+  'longitude',
+  'geolocation_accuracy',
+  'geolocation_timestamp',
+  'location_label',
+];
+
 export const useTasksStore = defineStore('tasks', () => {
   const tasks = ref([]);
   const loading = ref(false);
@@ -29,10 +37,15 @@ export const useTasksStore = defineStore('tasks', () => {
     if (!input?.title?.trim()) return;
     error.value = null;
     try {
-      const response = await tasksApi.create({
+      const taskPayload = {
         title: input.title.trim(),
         imgAttachmentKey: input.imgAttachmentKey,
-      });
+      };
+      for (const field of LOCATION_FIELDS) {
+        taskPayload[field] = input[field] ?? null;
+      }
+
+      const response = await tasksApi.create(taskPayload);
       tasks.value.push(response.data);
     } catch (err) {
       error.value = 'Erro ao adicionar tarefa.';
@@ -65,12 +78,18 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
-  async function updateTask(id, { title, imgAttachmentKey } = {}) {
+  async function updateTask(id, input = {}) {
+    const { title, imgAttachmentKey } = input;
     if (title !== undefined && !title.trim()) return;
     error.value = null;
     const payload = {};
     if (title !== undefined) payload.title = title.trim();
     if (imgAttachmentKey != null) payload.img_attachment_key = imgAttachmentKey;
+    for (const field of LOCATION_FIELDS) {
+      if (Object.hasOwn(input, field)) {
+        payload[field] = input[field] ?? null;
+      }
+    }
     try {
       const response = await tasksApi.update(id, payload);
       const index = tasks.value.findIndex((t) => t.id === id);

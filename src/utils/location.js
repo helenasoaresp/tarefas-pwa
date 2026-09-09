@@ -1,12 +1,12 @@
-export function extractAddressLabel(address) {
-  if (!address) return null
+export function extractAddressLabel(result) {
+  const address = result?.address ?? {}
 
   return (
-    address.label ||
-    address.display_name ||
-    address.address?.road ||
-    address.address?.street ||
-    null
+    address.road ||
+    address.pedestrian ||
+    address.path ||
+    result?.display_name ||
+    'Endereço não identificado'
   )
 }
 
@@ -15,7 +15,7 @@ export function locationCacheKey(latitude, longitude) {
     return null
   }
 
-  return `${Number(latitude).toFixed(5)},${Number(longitude).toFixed(5)}`
+  return `${Number(latitude).toFixed(4)},${Number(longitude).toFixed(4)}`
 }
 
 export function buildLocationPayload(location) {
@@ -40,6 +40,6 @@ export function buildLocationPayload(location) {
       : null,
 
     location_label:
-      location.label ?? null,
+      location.label?.trim() || null,
   }
 }
