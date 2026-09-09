@@ -167,11 +167,12 @@ onUnmounted(stopCamera);
 }
 
 .camera-result {
-  width: 100%;
-  max-height: 300px;
-  object-fit: contain;
+  display: block;
+  width: 250px;
+  height: 170px;
+  object-fit: cover;
   border-radius: 8px;
-  border: 2px solid #4a90d9;
+  margin: 15px auto;
 }
 
 .camera-actions {
